@@ -58,7 +58,7 @@ function App() {
   function onRegister(email, password) {
     register(email, password)
       .then((res) => {
-        console.log(email, password + ' App');
+        console.log(res + ' App');
         setIsInfoTooltipOpen(true)
         if (res) {
           setIsSuccess(true)

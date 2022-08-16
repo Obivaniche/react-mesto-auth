@@ -29,7 +29,7 @@ function Login({ onLogin }) {
                             className="form__input form__input_auth form__input_type_email"
                             name="email"
                             type="email"
-                            value={data.email}
+                            value={email}
                             minLength="2"
                             maxLength="40"
                             placeholder="Email"
@@ -44,7 +44,7 @@ function Login({ onLogin }) {
                             className="form__input form__input_auth form__input_type_password"
                             name="password"
                             type="text"
-                            value={data.password}
+                            value={password}
                             minLength="2"
                             maxLength="40"
                             placeholder="Пароль"
