@@ -11,7 +11,7 @@ import ConfirmDeletePopup from './ConfirmDeletePopup';
 import api from '../utils/Api';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import Register from './Register';
 import Login from './Login';
 import InfoTooltip from './InfoTooltip';
@@ -82,9 +82,7 @@ function App() {
           setLoggedIn(true);
           history.push('/');
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch((err) => console.log(err));
     }
   };
 
@@ -92,15 +90,34 @@ function App() {
     tokenCheck();
   }, []);
 
+  function onLogout() {
+    localStorage.removeItem('jwt');
+    history.push('/sign-in');
+    setLoggedIn(false);
+  };
+
+  function getInitialCards() {
+    api.getInitialCards()
+      .then((res) => {
+        setCards(res);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  function getUserInfo() {
+    api.getUserInfo()
+      .then((res) => {
+        setCurrentUser(res);
+      })
+      .catch((err) => console.log(err));
+  };
 
   useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
-      .then(([userData, userCard]) => {
-        setCurrentUser(userData);
-        setCards(userCard);
-      })
-      .catch((err) => console.log(`Ошибка: ${err}`));
-  }, []);
+    if (isLoggedIn) {
+      getInitialCards();
+      getUserInfo();
+    }
+  },[isLoggedIn]);
 
   function handleConfirmCardDelete(card) {
     setCardToDelete(card);
@@ -129,7 +146,7 @@ function App() {
         setCurrentUser(res);
         closeAllPopups();
       })
-      .catch((err) => console.log(`Ошибка: ${err}`));
+      .catch((err) => console.log(err));
   };
 
   function handleUpdateAvatar(data) {
@@ -138,7 +155,7 @@ function App() {
         setCurrentUser(res);
         closeAllPopups();
       })
-      .catch((err) => console.log(`Ошибка: ${err}`));
+      .catch((err) => console.log(err));
   };
 
   function handleCardLike(card) {
@@ -147,7 +164,7 @@ function App() {
       .then((newCard) => {
         setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
       })
-      .catch((err) => console.log(`Ошибка: ${err}`));
+      .catch((err) => console.log(err));
   };
 
   function handleCardDelete(card) {
@@ -155,7 +172,7 @@ function App() {
       .then(() => {
         setCards((state) => state.filter((c) => c._id !== card._id));
       })
-      .catch((err) => console.log(`Ошибка: ${err}`));
+      .catch((err) => console.log(err));
   };
 
   function handleAddCards(data) {
@@ -164,7 +181,7 @@ function App() {
         setCards([newCard, ...cards]);
         closeAllPopups();
       })
-      .catch((err) => console.log(`Ошибка: ${err}`));
+      .catch((err) => console.log(err));
   };
 
   function closeAllPopups() {
@@ -176,6 +193,33 @@ function App() {
     setIsInfoTooltipOpen(false);
   };
 
+  useEffect(() => {
+    if (
+      isEditProfilePopupOpen ||
+      isEditAvatarPopupOpen ||
+      isAddPlacePopupOpen ||
+      isInfoTooltipOpen ||
+      selectedCard
+    ) {
+      function handleEsc(e) {
+        if (e.key === "Escape") {
+          closeAllPopups();
+        }
+      }
+      document.addEventListener("keydown", handleEsc);
+      return () => {
+        document.removeEventListener("keydown", handleEsc);
+      };
+    }
+  }, [
+    isEditAvatarPopupOpen,
+    isEditProfilePopupOpen,
+    isAddPlacePopupOpen,
+    isInfoTooltipOpen,
+    selectedCard,
+  ]);
+
+
   return (
 
     <CurrentUserContext.Provider value={currentUser}>
@@ -186,15 +230,15 @@ function App() {
           <ProtectedRoute
             exact
             path="/"
+            isLoggedIn={isLoggedIn}
+            component={Main}
+            cards={cards}
             onEditAvatar={handleEditAvatarClick}
             onEditProfile={handleEditProfileClick}
             onAddPlace={handleAddPlaceClick}
             onCardClick={handleCardClick}
             onCardLike={handleCardLike}
             onCardDelete={handleConfirmCardDelete}
-            cards={cards}
-            isLoggedIn={isLoggedIn}
-            component={Main}
           />
 
           <Route path="/sign-up">
@@ -203,6 +247,10 @@ function App() {
 
           <Route path="/sign-in">
             <Login onLogin={onLogin} />
+          </Route>
+
+          <Route>
+              {isLoggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
           </Route>
 
         </Switch>
