@@ -57,18 +57,19 @@ function App() {
   };
 
   function onRegister(email, password) {
-    auth.register(email, password)
-      .then((res) => {
-        console.log(res + ' App');
-        setIsInfoTooltipOpen(true)
-        if (res) {
-          setIsSuccess(true)
-          history.push('/sign-in');
+    auth.register({ email, password })
+      .then((data) => {
+        if (data.email) {
+          localStorage.setItem("jwt", data.token);
+          setUserEmail(email);
         }
+        setIsSuccess(true);
+        setIsInfoToolTipOpen(true);
       })
-      .catch(() => {
-        setIsSuccess(false)
-        setIsInfoTooltipOpen(true)
+      .catch((err) => {
+        console.log(err);
+        setIsSuccess(false);
+        setIsInfoToolTipOpen(true);
       });
   };
 
@@ -78,7 +79,7 @@ function App() {
       auth.getContent(token)
         .then((res) => {
           if (res) {
-            userEmail(res.data.email)
+            setUserEmail(res.data.email)
           };
           setLoggedIn(true);
           history.push('/');
