@@ -32,6 +32,7 @@ function App() {
 
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const history = useHistory();
 
   const [currentUser, setCurrentUser] = useState({
@@ -44,7 +45,7 @@ function App() {
       .then((res) => {
         if (res) {
           setLoggedIn(true);
-          setUserEmailInHeader(email);
+          setUserEmail(email);
           history.push('/');
           localStorage.setItem('jwt', res.token);
         }
@@ -77,7 +78,7 @@ function App() {
       auth.getContent(token)
         .then((res) => {
           if (res) {
-            setUserEmailInHeader(res.data.email)
+            userEmail(res.data.email)
           };
           setLoggedIn(true);
           history.push('/');
@@ -90,7 +91,7 @@ function App() {
     tokenCheck();
   }, []);
 
-  function onLogout() {
+  function handleLogOut() {
     localStorage.removeItem('jwt');
     history.push('/sign-in');
     setLoggedIn(false);
@@ -219,12 +220,14 @@ function App() {
     selectedCard,
   ]);
 
-
   return (
 
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-        <Header />
+        <Header 
+          userEmail={userEmail}
+          handleLogOut={handleLogOut}
+        />
         <Switch>
 
           <ProtectedRoute
