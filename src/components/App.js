@@ -16,7 +16,7 @@ import Register from './Register';
 import Login from './Login';
 import InfoTooltip from './InfoTooltip';
 import ProtectedRoute from "./ProtectedRoute";
-import { register, authorization, validationToken } from "../utils/Auth";
+import auth from '../utils/Auth'
 
 function App() {
 
@@ -40,7 +40,7 @@ function App() {
   });
 
   function onLogin(password, email) {
-    authorization(password, email)
+    auth.login(password, email)
       .then((res) => {
         if (res) {
           setLoggedIn(true);
@@ -56,7 +56,7 @@ function App() {
   };
 
   function onRegister(email, password) {
-    register(email, password)
+    auth.register(email, password)
       .then((res) => {
         console.log(res + ' App');
         setIsInfoTooltipOpen(true)
@@ -74,7 +74,7 @@ function App() {
   function tokenCheck() {
     const token = localStorage.getItem('jwt');
     if (token) {
-      validationToken(token)
+      auth.getContent(token)
         .then((res) => {
           if (res) {
             setUserEmailInHeader(res.data.email)
