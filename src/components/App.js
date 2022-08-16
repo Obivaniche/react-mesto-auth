@@ -117,7 +117,7 @@ function App() {
       getInitialCards();
       getUserInfo();
     }
-  },[isLoggedIn]);
+  }, [isLoggedIn]);
 
   function handleConfirmCardDelete(card) {
     setCardToDelete(card);
@@ -250,7 +250,7 @@ function App() {
           </Route>
 
           <Route>
-              {isLoggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
+            {isLoggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
           </Route>
 
         </Switch>
